@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N.Ai</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Плавные переходы для всех элементов при смене темы */
+        *, *::before, *::after {
+            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulseGlowLight {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.5); }
+        }
+
+        @keyframes pulseGlowDark {
+            0%, 100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(168, 85, 247, 0.5); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .glow-effect {
+            animation: pulseGlowLight 4s infinite ease-in-out;
+        }
+        .dark .glow-effect {
+            animation: pulseGlowDark 4s infinite ease-in-out;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.8);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="h-full bg-orange-50/50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans overflow-hidden flex flex-col">
+
+    <header class="h-16 border-b border-orange-200/60 dark:border-purple-950/60 glass-panel z-20 px-4 md:px-6 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-400 dark:from-purple-600 dark:to-indigo-500 flex items-center justify-center text-white shadow-lg glow-effect">
+                <i class="fa-solid fa-brain text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base md:text-lg tracking-tight flex items-center gap-2">
+                    N.Ai <span class="text-xs px-2 py-0.5 bg-orange-500/10 text-orange-600 dark:bg-purple-500/15 dark:text-purple-300 font-medium rounded-full border border-orange-500/20 dark:border-purple-500/30">Бета версия</span>
+                </h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Ненастоящий ИИ на базе JS HTML</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+            <button onclick="clearChat()" title="Удалить чат" class="p-2.5 rounded-xl text-slate-500 hover:text-orange-600 dark:text-slate-400 dark:hover:text-purple-400 hover:bg-orange-100/60 dark:hover:bg-purple-950/40">
+                <i class="fa-solid fa-rotate-right text-sm"></i>
+            </button>
+            <button onclick="toggleTheme()" title="Сменить тему" class="p-2.5 rounded-xl text-slate-500 hover:text-orange-600 dark:text-slate-400 dark:hover:text-purple-400 hover:bg-orange-100/60 dark:hover:bg-purple-950/40">
+                <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col max-w-4xl w-full mx-auto relative overflow-hidden">
+        <!-- Chat history container -->
+        <div id="chatBox" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scroll-smooth">
+            <!-- Greeting Message -->
+            <div class="flex items-start space-x-3 md:space-x-4 animate-fade-in">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 dark:from-purple-600 dark:to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
+                    <i class="fa-solid fa-robot text-sm"></i>
+                </div>
+                <div class="flex-1 space-y-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-sm">N.Ai</span>
+                        <span class="text-xs text-slate-400">Только что</span>
+                    </div>
+                    <div class="p-4 rounded-2xl rounded-tl-sm bg-white dark:bg-slate-900 border border-orange-100 dark:border-purple-950/80 shadow-sm text-sm leading-relaxed max-w-2xl">
+                        Привет! Я ИИ - автоответчик, созданный Язалоком(Zxaok)
+                    </div>
+                    <!-- Quick action chips -->
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        <button onclick="sendPreset('Кто ты?')" class="text-xs px-3 py-1.5 rounded-lg bg-orange-100/70 dark:bg-purple-950/50 text-slate-700 dark:text-slate-200 hover:bg-orange-500 hover:text-white dark:hover:bg-purple-600">Кто ты?</button>
+                        <button onclick="sendPreset('Напиши код на Python')" class="text-xs px-3 py-1.5 rounded-lg bg-orange-100/70 dark:bg-purple-950/50 text-slate-700 dark:text-slate-200 hover:bg-orange-500 hover:text-white dark:hover:bg-purple-600">Кодик на PTHN</button>
+                        <button onclick="sendPreset('смехуятина')" class="text-xs px-3 py-1.5 rounded-lg bg-orange-100/70 dark:bg-purple-950/50 text-slate-700 dark:text-slate-200 hover:bg-orange-500 hover:text-white dark:hover:bg-purple-600">Смехуятина</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div id="typingIndicator" class="hidden px-4 md:px-6 py-2 flex items-center space-x-3 animate-fade-in">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 dark:from-purple-600 dark:to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
+                <i class="fa-solid fa-robot text-sm"></i>
+            </div>
+            <div class="p-3.5 rounded-2xl rounded-tl-sm bg-white dark:bg-slate-900 border border-orange-100 dark:border-purple-950/80 shadow-sm flex items-center space-x-1.5">
+                <div class="w-2 h-2 rounded-full bg-orange-500 dark:bg-purple-400 animate-bounce" style="animation-delay: 0s;"></div>
+                <div class="w-2 h-2 rounded-full bg-orange-500 dark:bg-purple-400 animate-bounce" style="animation-delay: 0.2s;"></div>
+                <div class="w-2 h-2 rounded-full bg-orange-500 dark:bg-purple-400 animate-bounce" style="animation-delay: 0.4s;"></div>
+            </div>
+        </div>
+
+        <div class="p-4 md:p-6 bg-gradient-to-t from-orange-50/80 dark:from-slate-950 via-orange-50/40 dark:via-slate-950/80 to-transparent shrink-0">
+            <div class="glass-panel p-2 rounded-2xl border border-orange-200/60 dark:border-purple-950/60 shadow-lg flex items-center space-x-2">
+                <textarea id="userInput" rows="1" placeholder="Запрос?" class="flex-1 bg-transparent border-none outline-none resize-none px-3 py-2 text-sm max-h-32 text-slate-800 dark:text-slate-100 placeholder-slate-400" onkeydown="handleKeyPress(event)" oninput="autoResize(this)"></textarea>
+                <button onclick="sendMessage()" id="sendBtn" class="w-10 h-10 rounded-xl bg-orange-500 hover:bg-orange-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white flex items-center justify-center shadow-md shrink-0 active:scale-95">
+                    <i class="fa-solid fa-arrow-up text-sm"></i>
+                </button>
+            </div>
+            <div class="text-center mt-2">
+                <p class="text-[11px] text-slate-400 dark:text-slate-500">N.Ai тупой как пробка:3</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = 'fa-solid fa-moon text-sm';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                icon.className = 'fa-solid fa-sun text-sm';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            document.getElementById('themeIcon').className = 'fa-solid fa-sun text-sm';
+        }
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        function getBotResponse(query) {
+            const text = query.toLowerCase().trim();
+
+            if (text.includes('привет') || text.includes('здароаа') || text.includes('ку') || text.includes('qq')) {
+                return "Ку! шо будем делать сегодня?";
+            } 
+            else if (text.includes('кто ты') || text.includes('как тебя зовут') || text.includes('ты хто')) {
+                return "Я — N.Ai, созданный Язалоком(Zxaok), нахожусь в бете , больше и больше будет появлятся с каждым обновлением!(он не может ответить на любую тему , только на определенные(потому что это автоответчик))";
+            } 
+            else if (text.includes('код на python') || text.includes('питон код')) {
+                return "Обязан предоставить! Вот пример простого и быстрого веб-сервера на Python с использованием Flask:\n\n```python\nfrom flask import Flask\napp = Flask(__name__)\n\n@app.route('/')\ndef home():\n    return 'Привет, мир!'\n\nif __name__ == '__main__':\n    app.run(debug=True)\n```\nХотите разобрать подробнее какой-то алгоритм?";
+            } 
+            else if (text.includes('шутк') || text.includes('смехуятина') || text.includes('минутка смеха')) {
+                const jokes = [
+                    "—Колобок повесился!",
+                    "Умерло две собаки,одна сгорела - вторая утонула. Первая - бульдог , вторая - хотдог!",
+                    "В команде джей умер эн. Грустно и вкусно<3)"
+                ];
+                return jokes[Math.floor(Math.random() * jokes.length)];
+            }
+            else if (text.includes('как дела') || text.includes('как ты поживаешь')) {
+                return "Все системы функционируют отлично! Энергия на максимуме, готов обрабатывать ваши запросы.";
+            }
+            else if (text.includes('пока') || text.includes('до свид') || text.includes('поки')) {
+                return "поки:>";
+            }
+            else if (text.includes('что такое murder drones') || text.includes('murder drones') || text.includes('дроны-убийцы')) {
+                return "О, Murder Drones! - Сериал от Glitch Inc. , много мерча , добрый Эн, его девушка Узи Доорман , Подруга Ви, Мама Узи - Нори Доорман и другие персонажи!";
+            } 
+            else if (text.includes('zxaok') || text.includes('язалок') || text.includes('zxk')) {
+                return "мой создатель:)))";
+            } 
+            else if (text.includes('хуй') || text.includes('пизда') || text.includes('залупа')  ||text.includes('еблан') || text.includes('ебанат') || text.includes('сука') || text.includes('пиздец') || text.includes('блять')) {
+                return "плохие слова:(";
+                    }
+            else if (text.includes('пинг')) {
+            return "понг";
+            }
+            else {
+                return `Интересная тема: «${query}». Я проанализировал ваш запрос и могу сказать, что меня не обучали этому`;
+            }
+        }
+
+        function sendPreset(text) {
+            document.getElementById('userInput').value = text;
+            sendMessage();
+        }
+
+        function clearChat() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML = `
+                <div class="flex items-start space-x-3 md:space-x-4 animate-fade-in">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 dark:from-purple-600 dark:to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
+                        <i class="fa-solid fa-robot text-sm"></i>
+                    </div>
+                    <div class="flex-1 space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-semibold text-sm">N.Ai</span>
+                            <span class="text-xs text-slate-400">Только что</span>
+                        </div>
+                        <div class="p-4 rounded-2xl rounded-tl-sm bg-white dark:bg-slate-900 border border-orange-100 dark:border-purple-950/80 shadow-sm text-sm leading-relaxed max-w-2xl">
+                            История чата очищена. Чем могу помочь?
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatMessageText(text) {
+            return text.replace(/\n/g, '<br>');
+        }
+
+        function sendMessage() {
+            const inputField = document.getElementById('userInput');
+            const chatBox = document.getElementById('chatBox');
+            const typingIndicator = document.getElementById('typingIndicator');
+            const query = inputField.value.trim();
+
+            if (!query) return;
+
+            inputField.value = '';
+            inputField.style.height = 'auto';
+
+            const userMsgHTML = `
+                <div class="flex items-start justify-end space-x-3 md:space-x-4 animate-fade-in">
+                    <div class="flex-1 space-y-2 text-right">
+                        <div class="flex items-center justify-end space-x-2">
+                            <span class="text-xs text-slate-400">Только что</span>
+                            <span class="font-semibold text-sm">Вы</span>
+                        </div>
+                        <div class="p-4 rounded-2xl rounded-tr-sm bg-orange-500 dark:bg-purple-600 text-white shadow-sm text-sm leading-relaxed max-w-2xl inline-block text-left">
+                            ${formatMessageText(query)}
+                        </div>
+                    </div>
+                    <div class="w-9 h-9 rounded-xl bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0 shadow-md">
+                        <i class="fa-solid fa-user text-sm"></i>
+                    </div>
+                </div>
+            `;
+            chatBox.insertAdjacentHTML('beforeend', userMsgHTML);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            typingIndicator.classList.remove('hidden');
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            setTimeout(() => {
+                typingIndicator.classList.add('hidden');
+                
+                const botReply = getBotResponse(query);
+                const botMsgHTML = `
+                    <div class="flex items-start space-x-3 md:space-x-4 animate-fade-in">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 dark:from-purple-600 dark:to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
+                            <i class="fa-solid fa-robot text-sm"></i>
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-semibold text-sm">N.Ai</span>
+                                <span class="text-xs text-slate-400">Только что</span>
+                            </div>
+                            <div class="p-4 rounded-2xl rounded-tl-sm bg-white dark:bg-slate-900 border border-orange-100 dark:border-purple-950/80 shadow-sm text-sm leading-relaxed max-w-2xl font-sans">
+                                ${formatMessageText(botReply)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatBox.insertAdjacentHTML('beforeend', botMsgHTML);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 800 + Math.random() * 400);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
